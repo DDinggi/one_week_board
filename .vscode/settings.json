@@ -1,0 +1,52 @@
+{
+  /* --- [1. 기본 포맷팅 설정] --- */
+  // 저장할 때 자동으로 포맷팅 (Prettier 실행)
+  "editor.formatOnSave": true,
+  // 기본 포맷터로 Prettier 강제 지정 (다른 포맷터와 충돌 방지)
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  /* --- [2. 자동 수정 (Lint)] --- */
+  // 저장할 때 ESLint 규칙에 따라 코드 자동 수정 (예: 사용 안 하는 변수 정리 등)
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  /* --- [3. Tailwind CSS 오류 방지] --- */
+  // globals.css에서 @tailwind, @apply 같은 키워드를 CSS 오류로 인식하지 않게 함
+  "css.validate": false,
+  "scss.validate": false,
+
+  /* --- [4. React/Javascript 개발 편의성] --- */
+  // 닫는 태그(</div>)를 자동으로 넣어줌
+  "html.autoClosingTags": true,
+  // 태그 이름을 바꾸면 닫는 태그 이름도 같이 바뀜 (<div> -> <section>)
+  "editor.linkedEditing": true,
+
+  // 파일 이동 시 경로 자동 업데이트 (파일 옮길 때 import 경로 깨짐 방지)
+  "javascript.updateImportsOnFileMove.enabled": "always",
+
+  /* --- [5. 가독성] --- */
+  // 괄호 쌍을 색깔별로 다르게 표시 (코드 파악 쉬움)
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+
+  /* --- [6. ES7+ React 스니펫 설정] --- */
+  // 스니펫(rafce 등)을 자동 완성 목록 최상단에 띄움 (필수)
+  "editor.snippetSuggestions": "top",
+  // 탭 키로 자동 완성 되도록 확실하게 설정
+  "editor.tabCompletion": "on",
+  // 자동 완성을 자동으로 띄움 (Ctrl+Space 안 눌러도 됨)
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  // 입력 시 자동 완성 지연 시간 (ms) - 0으로 하면 즉시 나타남
+  "editor.quickSuggestionsDelay": 0,
+  // React/Next.js 환경에서 태그 자동 완성(Emmet) 활성화
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  }
+}
+
