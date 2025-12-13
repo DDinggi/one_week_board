@@ -30,3 +30,26 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 티스토리 로고 텍스트 스타일 */
+.tit_tistory{
+  position: relative;             /**/
+  display: inline-flex;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: #111;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+/* 위쪽 막대 데코레이션 */
+.tit_tistory::before{
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 18px;
+  width: 50px;
+  height: 2px;
+  background: currentColor;
+}
