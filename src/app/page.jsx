@@ -1,7 +1,7 @@
 import Image from "next/image";
 import kakaoLogo from "@/assets/kakao-icon.svg" 
 import PostCard from "@/components/board/PostCard";
-
+import Link from "next/link";
 
 const posts_one = [
   {
@@ -187,8 +187,10 @@ export default function Home() {
           </p>
           <button className="w-full h-12 md:h-14 rounded-xl bg-yellow-300 text-black font-semibold
           text-[14px] flex items-center justify-center gap-2 shadow-sm hover:bg-yellow-500 transition">
+            <Link href="/login" className="flex items-center gap-2">
             <Image src={kakaoLogo} alt="카카오 아이콘" width={20} height={20} />
             카카오계정으로 시작하기
+            </Link>
           </button>
         </div>
         <div className = "border-t border-gray-200 my-4">
