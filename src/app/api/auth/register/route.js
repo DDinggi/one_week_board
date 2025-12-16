@@ -1,27 +1,36 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { signupSchema } from "@/lib/schemas";
 
 export async function POST(request) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const validation = signupSchema.safeParse(body);
 
-    if (!email || !password || typeof email !== "string" || typeof password !== "string") {
-      return NextResponse.json({ error: "email and password are required" }, { status: 400 });
-    }
-    if (password.length < 6) {
-      return NextResponse.json({ error: "password must be at least 6 chars" }, { status: 400 });
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: "Invalid input", issues: validation.error.issues },
+        { status: 400 }
+      );
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      return NextResponse.json({ error: "email already registered" }, { status: 409 });
+    const { email, nickname, password } = validation.data;
+
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail) {
+      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+    }
+
+    const existingNickname = await prisma.user.findUnique({ where: { nickname } });
+    if (existingNickname) {
+      return NextResponse.json({ error: "Nickname already taken" }, { status: 409 });
     }
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { email, password: hashed },
-      select: { id: true, email: true, createdAt: true },
+      data: { email, nickname, password: hashed },
+      select: { id: true, email: true, nickname: true, createdAt: true },
     });
 
     return NextResponse.json(user, { status: 201 });

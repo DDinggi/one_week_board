@@ -2,22 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { z } from "zod";
-
-const registerSchema = z
-  .object({
-    email: z.string().email("아이디(이메일)을 입력하세요"),
-    password: z.string().min(6, "비밀번호는 6자 이상이어야 합니다"),
-    passwordConfirm: z.string().min(6, "비밀번호 확인을 6자 이상 입력하세요"),
-  })
-  .refine((v) => v.password === v.passwordConfirm, {
-    path: ["passwordConfirm"],
-    message: "비밀번호가 일치하지 않습니다",
-  });
+import { signupSchema } from "@/lib/schemas";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "", passwordConfirm: "" });
+  const [form, setForm] = useState({ email: "", nickname: "", password: "", confirmPassword: "" });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +20,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setServerError("");
 
-    const result = registerSchema.safeParse(form);
+    const result = signupSchema.safeParse(form);
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach((issue) => {
@@ -47,7 +36,7 @@ export default function RegisterPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: form.email, password: form.password }),
+      body: JSON.stringify(form),
     });
 
     if (!res.ok) {
@@ -76,6 +65,15 @@ export default function RegisterPage() {
           {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
 
           <input
+            name="nickname"
+            placeholder="닉네임"
+            className="w-full border border-gray-400 p-3 rounded outline-none"
+            value={form.nickname}
+            onChange={handleChange}
+          />
+          {errors.nickname && <p className="text-xs text-red-500">{errors.nickname}</p>}
+
+          <input
             type="password"
             name="password"
             placeholder="비밀번호"
@@ -87,14 +85,14 @@ export default function RegisterPage() {
 
           <input
             type="password"
-            name="passwordConfirm"
+            name="confirmPassword"
             placeholder="비밀번호 확인"
             className="w-full border border-gray-400 p-3 rounded outline-none"
-            value={form.passwordConfirm}
+            value={form.confirmPassword}
             onChange={handleChange}
           />
-          {errors.passwordConfirm && (
-            <p className="text-xs text-red-500">{errors.passwordConfirm}</p>
+          {errors.confirmPassword && (
+            <p className="text-xs text-red-500">{errors.confirmPassword}</p>
           )}
 
           {serverError && <p className="text-xs text-red-500">{serverError}</p>}

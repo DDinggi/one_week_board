@@ -14,7 +14,7 @@ export default function PostCard({ post }) {
         </div>
         <CardHeader>
           <CardTitle className="line-clamp-2 text-lg">{post.title}</CardTitle>
-          {post.author?.email && <p className="text-sm text-gray-500">{post.author.email}</p>}
+          {post.author?.nickname && <p className="text-sm text-gray-500">{post.author.nickname}</p>}
         </CardHeader>
         <CardContent className="flex-1">
           <p className="text-sm text-gray-600 line-clamp-3">{post.content}</p>

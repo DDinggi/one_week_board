@@ -1,3 +1,6 @@
+//AXIOS 라이브러리 이용해서, -> 라우터 바꾸셈
+
+
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
@@ -7,7 +10,7 @@ export async function GET() {
   try {
     const posts = await prisma.post.findMany({
       orderBy: { createdAt: "desc" },
-      include: { author: { select: { email: true } } },
+      include: { author: { select: { nickname: true } } },
     });
     return NextResponse.json(posts);
   } catch (err) {
