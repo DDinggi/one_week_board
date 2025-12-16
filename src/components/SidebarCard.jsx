@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
+const tabClass =
+  "relative flex items-center justify-center py-4 text-xs font-semibold after:absolute after:bottom-2 after:left-1/2 after:-translate-x-1/2 after:h-[2px] after:w-10 after:bg-current after:scale-x-0 after:bg-gray-200 after:transition-transform after:origin-center hover:after:scale-x-100";
+
 export default function SidebarCard() {
   const { data: session, status } = useSession();
 
@@ -18,38 +21,36 @@ export default function SidebarCard() {
     return (
       <div className="p-5 space-y-5 rounded-none">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-full bg-gray-100" />
+          <div className="w-12 h-12 rounded-full bg-gray-100" />
           <div>
-            <p className="text-sm font-bold leading-tight">{session.user.email}</p>
+            <p className="text-base font-semibold leading-tight">{session.user.email}</p>
             <p className="text-xs text-gray-500">구독자 0명</p>
           </div>
-          <span className="ml-auto text-xl">⌄</span>
+          <span className="ml-auto text-lg text-gray-500">⌄</span>
         </div>
 
-        <div className="grid grid-cols-3 rounded-[10px] border border-black text-[17px] font-semibold overflow-hidden">
-          <Link href="/posts/new" className="py-3.5 text-center text-xs">
+        <div className="grid grid-cols-3 divide-x divide-gray-300 rounded-[18px] border border-black overflow-hidden">
+          <Link href="/posts/new" className={tabClass}>
             글쓰기
           </Link>
-          <div className="flex items-center justify-center border-l border-r border-gray-200">
-            <Link href="/my" className="py-3.5 px-4 text-center block w-full text-xs">
-              내 블로그
-            </Link>
-          </div>
-          <Link href="/settings" className="py-3.5 text-center text-xs">
+          <Link href="/my" className={tabClass}>
+            내 블로그
+          </Link>
+          <Link href="/settings" className={tabClass}>
             관리
           </Link>
         </div>
 
-        <div className="space-y-3 text-base text-gray-800">
-          <div className="flex justify-between items-center pt-3 text-xs">
+        <div className="space-y-3 text-sm text-gray-800">
+          <div className="flex justify-between items-center pt-2">
             <span>조회수</span>
             <span className="font-bold text-sm">0회 ▸</span>
           </div>
-          <div className="flex justify-between items-center border-t border-gray-200 pt-3 text-xs">
+          <div className="flex justify-between items-center border-t border-gray-200 pt-2">
             <span>방문자</span>
             <span className="font-bold text-sm">0명 ▸</span>
           </div>
-          <div className="flex justify-between items-center border-t border-gray-200 pt-3 text-xs">
+          <div className="flex justify-between items-center border-t border-gray-200 pt-2">
             <span>수익</span>
             <span className="font-bold text-sm">₩ 내 수익 예측해보기 ▸</span>
           </div>

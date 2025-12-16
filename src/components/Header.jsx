@@ -12,7 +12,11 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 h-16 flex items-center gap-6 px-6 md:px-10 bg-white border-b border-gray-200">
-      <span className="tit_tistory text-[22px] font-bold">tistory</span>
+      <span className="tit_tistory text-[22px] font-bold">
+        <Link href="/">
+        tistory
+        </Link>
+        </span>
 
       <ul className="flex items-center gap-5 text-sm font-semibold">
         {TABS.map((tab) => (
@@ -77,13 +81,13 @@ export default function Header() {
             <span className="text-sm text-gray-700">{session.user.email}</span>
             <Link
               href="/posts/new"
-              className="px-5 py-2.5 rounded-full bg-black text-white text-[14px] font-semibold"
+              className="px-5 py-2.5 rounded-full bg-black text-white text-[14px] font-semibold transition hover:bg-orange-500"
             >
               글쓰기
             </Link>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="px-4 py-2 rounded-full border border-gray-300 text-sm"
+              className="px-4 py-2 rounded-full border border-gray-300 text-sm transition hover:bg-gray-200"
             >
               로그아웃
             </button>
