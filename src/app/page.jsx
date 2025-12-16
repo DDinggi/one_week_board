@@ -1,214 +1,111 @@
 import Image from "next/image";
-import kakaoLogo from "@/assets/kakao-icon.svg" 
-import PostCard from "@/components/board/PostCard";
 import Link from "next/link";
+import prisma from "@/lib/prisma";
 
-const posts_one = [
-  {
-    id:1,
-    title: "Tistory 클론 코딩 - 1번째 게시글입니다.",
-    category: "응애 치타",
-    thumb: "/img1.jpg",
-  },
-   {
-    id:2,
-    title: "Tistory 클론 코딩 - 2번째 게시글입니다.",
-    category: "응애 여우",
-    thumb: "/img2.jfif",
-  },
-   {
-    id:3,
-    title: "Tistory 클론 코딩 - 3번째 게시글입니다.",
-    category: "응애 매",
-    thumb: "/img3.jfif",
-  },
-   {
-    id:4,
-    title: "Tistory 클론 코딩 - 4번째 게시글입니다.",
-    category: "응애 펭귄",
-    thumb: "/img4.jfif",
-  },
-   {
-    id:5,
-    title: "Tistory 클론 코딩 - 5번째 게시글입니다.",
-    category: "응애 호랑이",
-    thumb: "/img5.jpg",
-  },
-];
+const getThumb = (src) => {
+  if (!src) return "/kitty.webp";
+  const s = String(src).trim();
+  if (!s || s.toLowerCase() === "null") return "/kitty.webp";
+  if (s.startsWith("/") || s.startsWith("http://") || s.startsWith("https://")) return s;
+  return "/kitty.webp";
+};
 
-const creators = [
-  {
-    id: "c1",
-    name: "응애응애",
-    category: "응애 크리에이터",
-    subscribers: "1557명",
-    thumbnail: "",
-    posts: [
-      {
-        id: "p1",
-        title: "응애응애응애",
-        date: "2025.12.13",
-        likes: 7,
-        coments: 3,
-        thumb: "/img6.jpg",
-      },
-      {
-        id: "p2",
-        title: "응애응애응애",
-        date: "2025.12.14",
-        likes: 7,
-        coments: 3,
-        thumb: "/img7.jfif",
-      },
-    ],
-  },
-];
-
-const creators_two = [
-  {
-    id: "c1",
-    name: "우앙우앙",
-    category: "응애 크리에이터",
-    subscribers: "888484명",
-    thumbnail: "",
-    posts: [
-      {
-        id: "p1",
-        title: "응애응애응애",
-        date: "2025.12.13",
-        likes: 7,
-        coments: 3,
-        thumb: "/img6.jpg",
-      },
-      {
-        id: "p2",
-        title: "응애응애응애",
-        date: "2025.12.14",
-        likes: 7,
-        coments: 3,
-        thumb: "/img7.jfif",
-      },
-    ],
-  },
-];
-
-const posts_two = [
-  /*카드 데이터 배열2 */
-]
-
-function ListItem({ rank, item }) {
-  return (
-    <div className="grid grid-cols-[52px_1fr_auto] items-center gap-4 py-4 border-b border-gray-400">
-      <div className="text-3xl font-extrabold text-gray-300 leading-none">{rank}/</div>
-
-      <div className="space-y-1">
-        <p className="text-xs text-gray-500 font-semibold">{item.category}</p>
-        <p className="text-lg font-semibold leading-tight line-clamp-2">{item.title}</p>
-      </div>
-
-      <div className="w-20 h-16 rounded-2xl overflow-hidden bg-gray-100">
-        {item.thumb && (
-          <img src={item.thumb} alt={item.title} className="w-full h-full object-cover" />
-        )}
-      </div>
-    </div>
-  );
+async function getPosts() {
+  return prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { author: { select: { email: true } } },
+  });
 }
 
-function CreatorCard({ creator }) {
-  return (
-    <div className="bg-white py-3">
-      {/* 상단: 이름 + 구독 */}
-      <div className="w-full rounded-lg border border-gray-300 bg-gray-100 p-2 flex items-center">
-        <div className="flex-1">
-          <p className="text-[17px] font-semibold">{creator.name}</p>
-          <button className="text-xs text-gray-500">
-            S {creator.category} · {creator.subscribers} 구독
-          </button>
-        </div>
-        <button className="px-3 py-1.5 rounded-full border border-black-400 text-sm">
-          + 구독
-        </button>
-      </div>
+export default async function Home() {
+  const posts = await getPosts();
+  const hero = posts[0];
+  const rest = posts.slice(1);
 
-      {/* 최근 글 리스트 */}
-      <div className="mt-3 space-y-3">
-        {creator.posts.map((p) => (
-          <div key={p.id} className="flex items-start gap-3">
-            <div className="flex-1">
-              <p className="text-sm font-semibold leading-tight line-clamp-2">{p.title}</p>
-              <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                <span>♥ {p.likes}</span>
-                <span>💬 {p.comments}</span>
-                <span>{p.date}</span>
-              </div>
+  return (
+    <main className="max-w-6xl mx-auto px-6 md:px-10 py-4 grid grid-cols-1 md:grid-cols-[5fr_3fr] gap-10">
+      <section className="flex flex-col space-y-8">
+        {hero ? (
+          <div className="w-full relative overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+            <div className="relative aspect-[16/9] w-full">
+              <Image
+                src={getThumb(hero.thumbnail)}
+                alt={hero.title}
+                fill
+                className="object-cover"
+                priority
+              />
             </div>
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-              <img src={p.thumb} alt={p.title} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent p-6 flex flex-col justify-end text-white">
+              <h2 className="text-2xl md:text-3xl font-bold drop-shadow">{hero.title}</h2>
+              {hero.author?.email && (
+                <p className="text-sm mt-2 drop-shadow">{hero.author.email}</p>
+              )}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+        ) : (
+          <div className="w-full relative overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-gray-100 aspect-[16/9] flex items-center justify-center text-gray-500">
+            아직 게시글이 없습니다.
+          </div>
+        )}
 
-export default function Home() {
-  return (
-    <main className="max-w-6xl mx-auto px-6 md:px-10 py-8 grid grid-cols-1 md:grid-cols-[5fr_3fr] gap-20">
-      {/* 왼쪽: 포스트 카드 리스트 */}
-      <section className="flex flex-col space-y-6">
-        <div className="w-full relative aspect-[16/9] overflow-hidden rounded-xl">
-          <Image src="/kitty.webp" alt="intro image" fill className="object-cover" />
-        </div>
-
-
-
-        <div className="w-full">
-          {posts_one.map((item, idx) => (
-          <ListItem key={item.id} rank={idx+1} item = {item} />
-        ))}
-        </div>
-
-
-
-        <div>
-          {posts_two.map((post) => (
-            <PostCard key={post.id} {...post} />
+        <div className="space-y-4">
+          {rest.length === 0 && (
+            <div className="text-sm text-gray-500">
+              아직 게시글이 없습니다. 첫 글을 작성해 보세요.
+            </div>
+          )}
+          {rest.map((post, idx) => (
+            <Link
+              key={post.id}
+              href={`/posts/${post.id}`}
+              className="flex items-center gap-4 border-b border-gray-200 pb-4 hover:bg-gray-50 transition"
+            >
+              <div className="text-2xl font-bold text-orange-500 w-8 text-center">
+                {idx + 1}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-500">{post.author?.email || "익명"}</p>
+                <p className="text-lg font-semibold leading-snug line-clamp-2">{post.title}</p>
+              </div>
+              <div className="w-20 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                <Image
+                  src={getThumb(post.thumbnail)}
+                  alt={post.title}
+                  width={80}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* 오른쪽: 로그인/배너 영역 */}
-      <aside className="mt-6 md:pl-8 md:border-l md:border-gray-200">
-        <div>
-          <p className="text-[12px] text-gray-800 mb-4">
-            티스토리에 로그인하시고 더 많은 기능을 이용해보세요!
+      <aside className="md:pl-6 md:border-l md:border-gray-200 space-y-2">
+        <div className="p-4 space-y-3">
+          <p className="text-[12px] text-gray-800">
+            티스토리에 로그인하고 더 많은 기능을 사용해 보세요.
           </p>
-          <button className="w-full h-12 md:h-14 rounded-xl bg-yellow-300 text-black font-semibold
-          text-[14px] flex items-center justify-center gap-2 shadow-sm hover:bg-yellow-500 transition">
-            <Link href="/login" className="flex items-center gap-2">
-            <Image src={kakaoLogo} alt="카카오 아이콘" width={20} height={20} />
+          <Link
+            href="/login"
+            className="w-full h-14 rounded-xl bg-[#FEE500] text-black font-semibold text-[15px] flex items-center justify-center gap-2 shadow-sm hover:brightness-95 transition"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="#3B1E1E"
+              aria-hidden="true"
+            >
+              <path d="M12 3C6.48 3 2 6.52 2 10.5c0 2.38 1.56 4.5 3.96 5.76-.14.86-.5 2.01-1.37 3.23-.19.26-.03.63.28.63.6 0 2.43-.83 3.91-1.78.93.25 1.92.39 2.96.39 5.52 0 10-3.52 10-7.5S17.52 3 12 3Z" />
+            </svg>
             카카오계정으로 시작하기
-            </Link>
-          </button>
+          </Link>
         </div>
-        <div className = "border-t border-gray-200 my-4">
-        </div>
-
-        <h2 className="text-lg mt-12 font-extrabold flex items-center gap-2">
-          스토리 크리에이터 <span className="text-green-500 text-[20px]">S</span>
-        </h2>
-        
-        <div className= "w-full">
-          {creators.map((c) => (
-            <CreatorCard key = {c.id} creator={c} />
-          ))}
-          {creators_two.map((c) => (
-            <CreatorCard key = {c.id} creator={c} />
-          ))}
-        </div>
+        <hr className="my-2 border-t border-gray-200" />
       </aside>
+
     </main>
   );
 }

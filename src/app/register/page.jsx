@@ -1,18 +1,23 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
 
-const loginSchema = z.object({
-  email: z.string().email("아이디(이메일)을 입력하세요"),
-  password: z.string().min(6, "비밀번호는 6자 이상이어야 합니다"),
-});
+const registerSchema = z
+  .object({
+    email: z.string().email("아이디(이메일)을 입력하세요"),
+    password: z.string().min(6, "비밀번호는 6자 이상이어야 합니다"),
+    passwordConfirm: z.string().min(6, "비밀번호 확인을 6자 이상 입력하세요"),
+  })
+  .refine((v) => v.password === v.passwordConfirm, {
+    path: ["passwordConfirm"],
+    message: "비밀번호가 일치하지 않습니다",
+  });
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "", passwordConfirm: "" });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +31,7 @@ export default function LoginPage() {
     e.preventDefault();
     setServerError("");
 
-    const result = loginSchema.safeParse(form);
+    const result = registerSchema.safeParse(form);
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach((issue) => {
@@ -39,45 +44,26 @@ export default function LoginPage() {
     setErrors({});
     setLoading(true);
 
-    const res = await fetch("/api/auth/login", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ email: form.email, password: form.password }),
     });
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setServerError(data.error || "로그인에 실패했습니다");
+      setServerError(data.error || "회원가입에 실패했습니다");
       setLoading(false);
       return;
     }
 
-    const data = await res.json();
-    localStorage.setItem("loggedInUser", data.email);
-    router.push("/");
+    router.push("/login");
   };
 
   return (
     <main className="min-h-[70vh] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md rounded-3xl border border-gray-200 shadow-sm bg-white p-6 space-y-6">
-        <p className="text-sm text-gray-800">로그인하고 더 많은 기능을 사용해 보세요.</p>
-
-        <button
-          type="button"
-          className="w-full h-14 rounded-xl bg-[#FEE500] text-black font-semibold text-[15px] flex items-center justify-center gap-2 shadow-sm hover:brightness-95 transition"
-          onClick={() => router.push("/login")}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="#3B1E1E"
-            aria-hidden="true"
-          >
-            <path d="M12 3C6.48 3 2 6.52 2 10.5c0 2.38 1.56 4.5 3.96 5.76-.14.86-.5 2.01-1.37 3.23-.19.26-.03.63.28.63.6 0 2.43-.83 3.91-1.78.93.25 1.92.39 2.96.39 5.52 0 10-3.52 10-7.5S17.52 3 12 3Z" />
-          </svg>
-          카카오계정으로 시작하기
-        </button>
+        <h1 className="text-2xl font-bold">회원가입</h1>
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <input
@@ -99,6 +85,18 @@ export default function LoginPage() {
           />
           {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
 
+          <input
+            type="password"
+            name="passwordConfirm"
+            placeholder="비밀번호 확인"
+            className="w-full border border-gray-400 p-3 rounded outline-none"
+            value={form.passwordConfirm}
+            onChange={handleChange}
+          />
+          {errors.passwordConfirm && (
+            <p className="text-xs text-red-500">{errors.passwordConfirm}</p>
+          )}
+
           {serverError && <p className="text-xs text-red-500">{serverError}</p>}
 
           <button
@@ -106,15 +104,9 @@ export default function LoginPage() {
             className="w-full h-12 rounded-xl bg-[#FEE500] text-black font-semibold text-[15px] flex items-center justify-center shadow-sm hover:brightness-95 transition"
             disabled={loading}
           >
-            {loading ? "로그인 중..." : "로그인하기"}
+            {loading ? "가입 중..." : "회원가입"}
           </button>
         </form>
-
-        <div className="flex items-center justify-between text-sm text-gray-700">
-          <Link href="/register" className="underline">
-            회원가입
-          </Link>
-        </div>
       </div>
     </main>
   );

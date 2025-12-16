@@ -1,10 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 
 const TABS = ["홈", "피드", "스킨", "포럼"];
 
 export default function Header() {
-  const [active, setActive] = useState("홈");
+  const [active, setActive] = useState("Home");
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,13 +33,13 @@ export default function Header() {
         <div
           className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full border border-gray-300 bg-white focus-within:ring-2 focus-within:ring-orange-200"
           onFocus={() => setOpen(true)}
-          onClick = {() => setOpen((prev) => !prev)}
-          onBlur={()=> setTimeout(() => setOpen(false), 100)}
-          tabIndex = {0}
+          onClick={() => setOpen((prev) => !prev)}
+          onBlur={() => setTimeout(() => setOpen(false), 100)}
+          tabIndex={0}
         >
           <input
             type="search"
-            placeholder="검색어 입력"
+            placeholder="Search..."
             className="bg-transparent outline-none text-sm w-32 md:w-48"
           />
           <span className="text-black" aria-hidden="true">
@@ -66,12 +67,15 @@ export default function Header() {
 
       <div className="hidden md:flex items-center gap-4 text-sm text-gray-800 ml-auto">
         <div className="flex items-center gap-2">
-          <span className="text-black">🔊</span>
-          <span className="text-[14px]">공지 문구를 여기에 넣으세요</span>
+          <span className="text-black">🔔</span>
+          <span className="text-[14px]">새로운 소식을 확인하세요</span>
         </div>
-        <button className="px-7 py-3 rounded-full bg-black text-white text-[14px] font-semibold">
-          시작하기
-        </button>
+        <Link
+          href="/posts/new"
+          className="px-7 py-3 rounded-full bg-black text-white text-[14px] font-semibold"
+        >
+          글쓰기
+        </Link>
       </div>
     </header>
   );
