@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 const TABS = ["홈", "피드", "스킨", "포럼"];
 
 export default function Header() {
-  const [active, setActive] = useState("Home");
+  const { data: session } = useSession();
+  const [active, setActive] = useState("홈");
   const [open, setOpen] = useState(false);
 
   return (
@@ -70,12 +72,30 @@ export default function Header() {
           <span className="text-black">🔔</span>
           <span className="text-[14px]">새로운 소식을 확인하세요</span>
         </div>
-        <Link
-          href="/posts/new"
-          className="px-7 py-3 rounded-full bg-black text-white text-[14px] font-semibold"
-        >
-          글쓰기
-        </Link>
+        {session?.user ? (
+          <>
+            <span className="text-sm text-gray-700">{session.user.email}</span>
+            <Link
+              href="/posts/new"
+              className="px-5 py-2.5 rounded-full bg-black text-white text-[14px] font-semibold"
+            >
+              글쓰기
+            </Link>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="px-4 py-2 rounded-full border border-gray-300 text-sm"
+            >
+              로그아웃
+            </button>
+          </>
+        ) : (
+          <Link
+            href="/login"
+            className="px-7 py-3 rounded-full bg-black text-white text-[14px] font-semibold"
+          >
+            시작하기
+          </Link>
+        )}
       </div>
     </header>
   );

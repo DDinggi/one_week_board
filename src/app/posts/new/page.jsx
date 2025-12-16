@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 export default function NewPostPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [form, setForm] = useState({
     title: "",
     content: "",
-    authorId: "",
     thumbnail: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,7 +37,6 @@ export default function NewPostPage() {
       body: JSON.stringify({
         title: form.title,
         content: form.content,
-        authorId: Number(form.authorId),
         thumbnail: form.thumbnail || undefined,
       }),
     });
@@ -45,6 +51,14 @@ export default function NewPostPage() {
     const post = await res.json();
     router.push(`/posts/${post.id}`);
   };
+
+  if (status === "loading") {
+    return (
+      <main className="max-w-2xl mx-auto px-6 py-10">
+        <p className="text-sm text-gray-500">세션 확인 중...</p>
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-10 space-y-6">
@@ -70,20 +84,6 @@ export default function NewPostPage() {
             onChange={handleChange}
             required
           />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-semibold">작성자 ID</label>
-          <input
-            name="authorId"
-            type="number"
-            className="w-full border p-3 rounded outline-none"
-            value={form.authorId}
-            onChange={handleChange}
-            required
-            min={1}
-          />
-          <p className="text-xs text-gray-500">Prisma Studio에서 만든 User의 id를 입력하세요.</p>
         </div>
 
         <div className="space-y-1">

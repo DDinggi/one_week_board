@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -39,21 +40,18 @@ export default function LoginPage() {
     setErrors({});
     setLoading(true);
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+    const res = await signIn("credentials", {
+      redirect: false,
+      email: form.email,
+      password: form.password,
     });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setServerError(data.error || "로그인에 실패했습니다");
+    if (!res || res.error) {
+      setServerError(res?.error || "로그인에 실패했습니다");
       setLoading(false);
       return;
     }
 
-    const data = await res.json();
-    localStorage.setItem("loggedInUser", data.email);
     router.push("/");
   };
 

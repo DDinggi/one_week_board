@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import SidebarCard from "@/components/SidebarCard";
 
 const getThumb = (src) => {
   if (!src) return "/kitty.webp";
@@ -82,28 +83,9 @@ export default async function Home() {
         </div>
       </section>
 
-      <aside className="md:pl-6 md:border-l md:border-gray-200 space-y-2">
-        <div className="p-4 space-y-3">
-          <p className="text-[12px] text-gray-800">
-            티스토리에 로그인하고 더 많은 기능을 사용해 보세요.
-          </p>
-          <Link
-            href="/login"
-            className="w-full h-14 rounded-xl bg-[#FEE500] text-black font-semibold text-[15px] flex items-center justify-center gap-2 shadow-sm hover:brightness-95 transition"
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="#3B1E1E"
-              aria-hidden="true"
-            >
-              <path d="M12 3C6.48 3 2 6.52 2 10.5c0 2.38 1.56 4.5 3.96 5.76-.14.86-.5 2.01-1.37 3.23-.19.26-.03.63.28.63.6 0 2.43-.83 3.91-1.78.93.25 1.92.39 2.96.39 5.52 0 10-3.52 10-7.5S17.52 3 12 3Z" />
-            </svg>
-            카카오계정으로 시작하기
-          </Link>
-        </div>
-        <hr className="my-2 border-t border-gray-200" />
+      <aside className="mt-0 md:pl-5 md:border-l md:border-gray-200 space-y-2">
+        <SidebarCard />
+        <hr className="my-2 border-t" />
       </aside>
 
     </main>

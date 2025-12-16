@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function GET() {
   try {
@@ -16,28 +18,23 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { title, content, authorId, thumbnail } = body;
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (
-      !title ||
-      !content ||
-      typeof title !== "string" ||
-      typeof content !== "string" ||
-      !authorId ||
-      Number.isNaN(Number(authorId))
-    ) {
-      return NextResponse.json(
-        { error: "title, content, authorId are required" },
-        { status: 400 }
-      );
+    const body = await request.json();
+    const { title, content, thumbnail } = body;
+
+    if (!title || !content || typeof title !== "string" || typeof content !== "string") {
+      return NextResponse.json({ error: "title and content are required" }, { status: 400 });
     }
 
     const post = await prisma.post.create({
       data: {
         title: title.trim(),
         content: content.trim(),
-        authorId: Number(authorId),
+        authorId: session.user.id,
         thumbnail: thumbnail || null,
       },
     });
