@@ -24,7 +24,8 @@ const ensureOwner = async (postId, userId) => {
 
 export async function GET(_request, { params }) {
   // Return a single post with author email
-  const id = parseId(params.id);
+  const routeParams = await params;
+  const id = parseId(routeParams?.id);
   if (!id) {
     return NextResponse.json({ error: "Post not found" }, { status: 404 });
   }
@@ -43,7 +44,8 @@ export async function GET(_request, { params }) {
 
 export async function PATCH(request, { params }) {
   // Update post title/content/thumbnail for the owner
-  const id = parseId(params.id);
+  const routeParams = await params;
+  const id = parseId(routeParams?.id);
   if (!id) return NextResponse.json({ error: "Post not found" }, { status: 404 });
 
   const session = await getServerSession(authOptions);
@@ -80,7 +82,8 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(_request, { params }) {
   // Delete a post if the requester is the owner
-  const id = parseId(params.id);
+  const routeParams = await params;
+  const id = parseId(routeParams?.id);
   if (!id) return NextResponse.json({ error: "Post not found" }, { status: 404 });
 
   const session = await getServerSession(authOptions);
