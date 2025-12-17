@@ -1,17 +1,26 @@
-//AXIOS 라이브러리 이용해서, -> 라우터 바꾸셈
-
-
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+// Helpers
+const authorSelect = { select: { email: true } };
+
+const listPosts = () =>
+  prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { author: authorSelect },
+  });
+
+const createPost = (data) =>
+  prisma.post.create({
+    data,
+  });
+
 export async function GET() {
+  // Fetch the latest posts with minimal author info
   try {
-    const posts = await prisma.post.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { author: { select: { nickname: true } } },
-    });
+    const posts = await listPosts();
     return NextResponse.json(posts);
   } catch (err) {
     console.error("GET /api/posts error", err);
@@ -20,6 +29,7 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  // Create a post for the logged-in user
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -33,13 +43,11 @@ export async function POST(request) {
       return NextResponse.json({ error: "title and content are required" }, { status: 400 });
     }
 
-    const post = await prisma.post.create({
-      data: {
-        title: title.trim(),
-        content: content.trim(),
-        authorId: session.user.id,
-        thumbnail: thumbnail || null,
-      },
+    const post = await createPost({
+      title: title.trim(),
+      content: content.trim(),
+      authorId: session.user.id,
+      thumbnail: thumbnail || null,
     });
 
     return NextResponse.json(post, { status: 201 });

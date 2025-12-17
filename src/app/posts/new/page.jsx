@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
+// Auth-gated post creation form (client-side); uploads image (optional) then creates a post.
 export default function NewPostPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -11,6 +12,7 @@ export default function NewPostPage() {
     title: "",
     content: "",
     thumbnail: "",
+    file: null,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,10 +28,35 @@ export default function NewPostPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setForm((prev) => ({ ...prev, file }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    let thumbnailUrl = form.thumbnail || "";
+
+    // Optional image upload to /api/upload before creating the post
+    if (form.file) {
+      const data = new FormData();
+      data.append("file", form.file);
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+      if (!uploadRes.ok) {
+        const uploadErr = await uploadRes.json().catch(() => ({}));
+        setError(uploadErr.error || "이미지 업로드에 실패했습니다.");
+        setLoading(false);
+        return;
+      }
+      const uploadJson = await uploadRes.json();
+      thumbnailUrl = uploadJson.url || thumbnailUrl;
+    }
 
     const res = await fetch("/api/posts", {
       method: "POST",
@@ -37,13 +64,13 @@ export default function NewPostPage() {
       body: JSON.stringify({
         title: form.title,
         content: form.content,
-        thumbnail: form.thumbnail || undefined,
+        thumbnail: thumbnailUrl || undefined,
       }),
     });
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || "게시글 생성에 실패했습니다");
+      setError(data.error || "게시글 작성에 실패했습니다.");
       setLoading(false);
       return;
     }
@@ -62,7 +89,7 @@ export default function NewPostPage() {
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-10 space-y-6">
-      <h1 className="text-2xl font-bold">새 게시글 작성</h1>
+      <h1 className="text-2xl font-bold">글 작성</h1>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-1">
           <label className="text-sm font-semibold">제목</label>
@@ -87,12 +114,18 @@ export default function NewPostPage() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-semibold">썸네일 URL (옵션)</label>
+          <label className="text-sm font-semibold">썸네일 URL (선택)</label>
           <input
             name="thumbnail"
             className="w-full border p-3 rounded outline-none"
             value={form.thumbnail}
             onChange={handleChange}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="w-full text-sm"
           />
         </div>
 

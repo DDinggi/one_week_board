@@ -3,6 +3,7 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import SidebarCard from "@/components/SidebarCard";
 
+// Home feed: SSR fetches posts and renders hero + list + mini "story creator" sidebar.
 const getThumb = (src) => {
   if (!src) return "/kitty.webp";
   const s = String(src).trim();

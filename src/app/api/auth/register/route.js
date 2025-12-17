@@ -3,6 +3,16 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signupSchema } from "@/lib/schemas";
 
+const normalizeEmail = (email) => email.trim().toLowerCase();
+
+const ensureEmailUnique = async (email) => {
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+  }
+  return null;
+};
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -11,26 +21,20 @@ export async function POST(request) {
     if (!validation.success) {
       return NextResponse.json(
         { error: "Invalid input", issues: validation.error.issues },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { email, nickname, password } = validation.data;
+    const { email, password } = validation.data;
+    const normalizedEmail = normalizeEmail(email);
 
-    const existingEmail = await prisma.user.findUnique({ where: { email } });
-    if (existingEmail) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
-    }
-
-    const existingNickname = await prisma.user.findUnique({ where: { nickname } });
-    if (existingNickname) {
-      return NextResponse.json({ error: "Nickname already taken" }, { status: 409 });
-    }
+    const emailConflict = await ensureEmailUnique(normalizedEmail);
+    if (emailConflict) return emailConflict;
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { email, nickname, password: hashed },
-      select: { id: true, email: true, nickname: true, createdAt: true },
+      data: { email: normalizedEmail, password: hashed },
+      select: { id: true, email: true, createdAt: true },
     });
 
     return NextResponse.json(user, { status: 201 });
