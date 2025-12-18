@@ -7,8 +7,8 @@ import { useState } from "react";
 import { z } from "zod";
 
 const loginSchema = z.object({
-  email: z.string().email("아이디(이메일)을 입력하세요"),
-  password: z.string().min(6, "비밀번호는 6자 이상이어야 합니다"),
+  email: z.string().email("이메일 형식이 올바르지 않습니다."),
+  password: z.string().min(6, "비밀번호는 최소 6자 이상이어야 합니다."),
 });
 
 export default function LoginPage() {
@@ -47,7 +47,7 @@ export default function LoginPage() {
     });
 
     if (!res || res.error) {
-      setServerError(res?.error || "로그인에 실패했습니다");
+      setServerError(res?.error || "로그인에 실패했습니다.");
       setLoading(false);
       return;
     }
@@ -56,60 +56,53 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-[70vh] flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl border border-gray-200 shadow-sm bg-white p-6 space-y-6">
-        <p className="text-sm text-gray-800">로그인하고 더 많은 기능을 사용해 보세요.</p>
+    <main className="min-h-[80vh] bg-gray-50 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white shadow-sm p-8 space-y-6">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold text-gray-900">로그인</h1>
+          <p className="text-sm text-gray-600">이메일과 비밀번호로 계속 진행하세요.</p>
+        </div>
 
-        <button
-          type="button"
-          className="w-full h-14 rounded-xl bg-[#FEE500] text-black font-semibold text-[15px] flex items-center justify-center gap-2 shadow-sm hover:brightness-95 transition"
-          onClick={() => router.push("/login")}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="#3B1E1E"
-            aria-hidden="true"
-          >
-            <path d="M12 3C6.48 3 2 6.52 2 10.5c0 2.38 1.56 4.5 3.96 5.76-.14.86-.5 2.01-1.37 3.23-.19.26-.03.63.28.63.6 0 2.43-.83 3.91-1.78.93.25 1.92.39 2.96.39 5.52 0 10-3.52 10-7.5S17.52 3 12 3Z" />
-          </svg>
-          카카오계정으로 시작하기
-        </button>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">이메일</label>
+            <input
+              name="email"
+              placeholder="email@example.com"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/60 focus:border-black"
+              value={form.email}
+              onChange={handleChange}
+            />
+            {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+          </div>
 
-        <form className="space-y-3" onSubmit={handleSubmit}>
-          <input
-            name="email"
-            placeholder="아이디(이메일)"
-            className="w-full border border-gray-400 p-3 rounded outline-none"
-            value={form.email}
-            onChange={handleChange}
-          />
-          {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
-
-          <input
-            type="password"
-            name="password"
-            placeholder="비밀번호"
-            className="w-full border border-gray-400 p-3 rounded outline-none"
-            value={form.password}
-            onChange={handleChange}
-          />
-          {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">비밀번호</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="••••••"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/60 focus:border-black"
+              value={form.password}
+              onChange={handleChange}
+            />
+            {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
+          </div>
 
           {serverError && <p className="text-xs text-red-500">{serverError}</p>}
 
           <button
             type="submit"
-            className="w-full h-12 rounded-xl bg-[#FEE500] text-black font-semibold text-[15px] flex items-center justify-center shadow-sm hover:brightness-95 transition"
+            className="w-full h-12 rounded-lg bg-black text-white font-semibold text-sm shadow-sm transition hover:bg-gray-900 disabled:opacity-60"
             disabled={loading}
           >
-            {loading ? "로그인 중..." : "로그인하기"}
+            {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
 
         <div className="flex items-center justify-between text-sm text-gray-700">
-          <Link href="/register" className="underline">
+          <span className="text-gray-500">계정이 없나요?</span>
+          <Link href="/register" className="font-semibold text-black hover:underline">
             회원가입
           </Link>
         </div>

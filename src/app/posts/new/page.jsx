@@ -4,14 +4,13 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
-// Auth-gated post creation form (client-side); uploads image (optional) then creates a post.
+// Post creation form with optional thumbnail upload, styled like a clean editor.
 export default function NewPostPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [form, setForm] = useState({
     title: "",
     content: "",
-    thumbnail: "",
     file: null,
   });
   const [error, setError] = useState("");
@@ -38,16 +37,12 @@ export default function NewPostPage() {
     setError("");
     setLoading(true);
 
-    let thumbnailUrl = form.thumbnail || "";
+    let thumbnailUrl = "";
 
-    // Optional image upload to /api/upload before creating the post
     if (form.file) {
       const data = new FormData();
       data.append("file", form.file);
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: data,
-      });
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: data });
       if (!uploadRes.ok) {
         const uploadErr = await uploadRes.json().catch(() => ({}));
         setError(uploadErr.error || "이미지 업로드에 실패했습니다.");
@@ -70,7 +65,7 @@ export default function NewPostPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || "게시글 작성에 실패했습니다.");
+      setError(data.error || "게시글 생성에 실패했습니다.");
       setLoading(false);
       return;
     }
@@ -81,64 +76,84 @@ export default function NewPostPage() {
 
   if (status === "loading") {
     return (
-      <main className="max-w-2xl mx-auto px-6 py-10">
+      <main className="max-w-4xl mx-auto px-6 py-10">
         <p className="text-sm text-gray-500">세션 확인 중...</p>
       </main>
     );
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-6 py-10 space-y-6">
-      <h1 className="text-2xl font-bold">글 작성</h1>
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="space-y-1">
-          <label className="text-sm font-semibold">제목</label>
-          <input
-            name="title"
-            className="w-full border p-3 rounded outline-none"
-            value={form.title}
-            onChange={handleChange}
-            required
-          />
+    <main className="min-h-[80vh] bg-gray-50 px-4 py-10">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-500">New Post</p>
+            <h1 className="text-3xl font-bold text-gray-900 mt-1">새 글 작성</h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            자동 저장 없음
+          </div>
         </div>
 
-        <div className="space-y-1">
-          <label className="text-sm font-semibold">내용</label>
-          <textarea
-            name="content"
-            className="w-full border p-3 rounded outline-none h-40"
-            value={form.content}
-            onChange={handleChange}
-            required
-          />
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-800">제목</label>
+              <input
+                name="title"
+                placeholder="제목을 입력하세요"
+                className="w-full text-2xl md:text-3xl font-semibold text-gray-900 border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-black/60 focus:border-black"
+                value={form.title}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-800">본문</label>
+              <textarea
+                name="content"
+                placeholder="내용을 입력하세요"
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 min-h-[260px] text-base leading-7 outline-none focus:ring-2 focus:ring-black/60 focus:border-black resize-none"
+                value={form.content}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-800">이미지 업로드 (선택)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full text-sm border border-dashed border-gray-300 rounded-xl px-4 py-3 bg-gray-50 hover:border-gray-400 cursor-pointer"
+              />
+            </div>
+
+            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-lg bg-black text-white font-semibold hover:bg-gray-900 transition disabled:opacity-60"
+                disabled={loading}
+              >
+                {loading ? "작성 중..." : "게시하기"}
+              </button>
+              <button
+                type="button"
+                className="px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                onClick={() => router.back()}
+                disabled={loading}
+              >
+                취소
+              </button>
+            </div>
+          </form>
         </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-semibold">썸네일 URL (선택)</label>
-          <input
-            name="thumbnail"
-            className="w-full border p-3 rounded outline-none"
-            value={form.thumbnail}
-            onChange={handleChange}
-          />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="w-full text-sm"
-          />
-        </div>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full bg-black text-white py-3 rounded font-semibold hover:bg-gray-900 transition"
-          disabled={loading}
-        >
-          {loading ? "작성 중..." : "게시글 등록"}
-        </button>
-      </form>
+      </div>
     </main>
   );
 }
